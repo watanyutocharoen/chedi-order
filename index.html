@@ -159,9 +159,12 @@ function isCF(i){return isC(i)||isF(i)}
 function fsel(r,g){return (r.g&&r.g[g])||[]}
 function fopt(i,gi,o){return (i.groups[gi].options[o])||{name:'',price:0}}
 function fprice(i,r){var t=0;i.groups.forEach(function(g,gi){fsel(r,gi).forEach(function(o){t+=Number(fopt(i,gi,o).price)||0})});return t}
-function fbad(i,r){return i.groups.some(function(g,gi){return g.req&&!fsel(r,gi).length})}
-function ftext(i,r){var a=[];i.groups.forEach(function(g,gi){var s=fsel(r,gi).map(function(o){var op=fopt(i,gi,o);return op.name+(Number(op.price)>0?' '+op.price+' บาท':'')});if(s.length)a.push(g.name+': '+s.join(', '))});return a.join(' | ')}
-function fcopy(i,r){var o={};i.groups.forEach(function(g,gi){var s=fsel(r,gi).map(function(k){return fopt(i,gi,k).name});if(s.length)o[g.name]=s});return o}
+function fmax(i,r,gi){var n=null,nm=i.groups[gi].name;i.groups.forEach(function(g,k){fsel(r,k).forEach(function(o){var l=fopt(i,k,o).lim;if(l)Object.keys(l).forEach(function(key){if(nm.indexOf(key)>=0)n=n==null?l[key]:Math.min(n,l[key])})})});return n!=null?n:(i.groups[gi].max||0)}
+function fsub(i,r,gi,o){var op=fopt(i,gi,o);if(!op.sub||!op.sub.length)return '';var x=r.s&&r.s[gi+'-'+o];return x!=null&&op.sub[x]!=null?op.sub[x]:''}
+function fbad(i,r){return i.groups.some(function(g,gi){var s=fsel(r,gi);return (g.req&&!s.length)||s.some(function(o){var op=fopt(i,gi,o);return op.sub&&op.sub.length&&!fsub(i,r,gi,o)})})}
+function fname(i,r,gi,o){var op=fopt(i,gi,o),sb=fsub(i,r,gi,o);return op.name+(sb?' ('+sb+')':'')}
+function ftext(i,r){var a=[];i.groups.forEach(function(g,gi){var s=fsel(r,gi).map(function(o){var op=fopt(i,gi,o);return fname(i,r,gi,o)+(Number(op.price)>0?' '+op.price+' บาท':'')});if(s.length)a.push(g.name+': '+s.join(', '))});return a.join(' | ')}
+function fcopy(i,r){var o={};i.groups.forEach(function(g,gi){var s=fsel(r,gi).map(function(k){return fname(i,r,gi,k)});if(s.length)o[g.name]=s});return o}
 function crowsOf(i){var a=S.crows[i.id];if(!a||!a.length)a=S.crows[i.id]=[newCrow(i,0)];return a}
 function newCrow(i,q){if(isF(i))return {q:q,g:{}};var c={};i.parts.forEach(function(p){c[p.name]=p.kind==='num'?1:0});return {q:q,c:c}}
 function cq(id){return (S.crows[id]||[]).reduce(function(a,r){return a+(r.q>0?r.q:0)},0)}
@@ -176,10 +179,12 @@ function frowsHTML(i){
     h+='<div class="xrow"><div class="fr" style="width:100%"><b>แบบที่ '+(ri+1)+'</b>'+(ri>0?'<button class="link" data-act="crm" data-id="'+i.id+'" data-r="'+ri+'">ลบแบบนี้</button>':'')+'</div>'+
       '<div class="fr" style="width:100%"><span>จำนวนชุด</span><div class="qty"><button type="button" data-act="cdec" data-id="'+i.id+'" data-r="'+ri+'" aria-label="ลด">−</button><input id="cq-'+i.id+'-'+ri+'" type="number" inputmode="numeric" min="0" value="'+(r.q>0?r.q:0)+'" aria-label="จำนวนชุด แบบที่ '+(ri+1)+'"><button type="button" data-act="cinc" data-id="'+i.id+'" data-r="'+ri+'" aria-label="เพิ่ม">+</button></div></div>';
     i.groups.forEach(function(g,gi){
-      var sel=fsel(r,gi);
-      h+='<div style="width:100%"><div class="note" style="margin:6px 0 2px"><b>'+esc(g.name)+'</b> <small>('+(g.type==='many'?'เลือกได้'+(g.max?'ไม่เกิน '+g.max+' อย่าง':'หลายอย่าง'):'เลือก 1')+(g.req?' · บังคับ':'')+')</small></div><div class="chips pk">';
+      var sel=fsel(r,gi),fm=g.type==='many'?fmax(i,r,gi):0;
+      h+='<div style="width:100%"><div class="note" style="margin:6px 0 2px"><b>'+esc(g.name)+'</b> <small>('+(g.type==='many'?'เลือกได้'+(fm?'ไม่เกิน '+fm+' อย่าง':'หลายอย่าง'):'เลือก 1')+(g.req?' · บังคับ':'')+')</small></div><div class="chips pk">';
       g.options.forEach(function(o,oi){var on=sel.indexOf(oi)>=0;h+='<button type="button" class="pkb" data-act="fsel" data-id="'+i.id+'" data-r="'+ri+'" data-g="'+gi+'" data-o="'+oi+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(o.name)+(Number(o.price)>0?' '+o.price+'฿':'')+'</button>'});
-      h+='</div></div>';
+      h+='</div>';
+      sel.forEach(function(o){var op=fopt(i,gi,o);if(!(op.sub&&op.sub.length))return;h+='<div class="note" style="margin:6px 0 2px">'+esc(op.name)+' ใส่อะไร:</div><div class="chips pk">';op.sub.forEach(function(sn,si){var on2=fsub(i,r,gi,o)===sn;h+='<button type="button" class="pkb" data-act="fsub" data-id="'+i.id+'" data-r="'+ri+'" data-g="'+gi+'" data-o="'+o+'" data-s="'+si+'" aria-pressed="'+on2+'">'+(on2?'✓ ':'')+esc(sn)+'</button>'});h+='</div>'});
+      h+='</div>';
     });
     h+='<div class="bsum">'+(bad&&r.q>0?'<b class="warn">ยังเลือกไม่ครบหัวข้อบังคับ</b> · ':'')+'ชุดละ <b>'+money(pp)+'</b>'+(r.q>0?' · '+r.q+' ชุด = <b>'+money(pp*r.q)+'</b>':'')+'</div></div>';
   });
@@ -325,14 +330,20 @@ function formFormHTML(s){
     '<input id="nf-gn-'+id+'" class="inp" style="margin-top:8px;width:100%" placeholder="ชื่อหัวข้อ เช่น 1.เลือกไซส์" value="'+d('nf-gn-')+'">'+
     '<select id="nf-gk-'+id+'" class="inp" style="margin-top:8px;width:100%">'+['one-req','one','many'].map(function(k){return '<option value="'+k+'"'+(kk===k?' selected':'')+'>'+KL[k]+'</option>'}).join('')+'</select>'+
     (kk==='many'?'<input id="nf-gm-'+id+'" class="inp" type="number" inputmode="numeric" min="0" style="margin-top:8px;width:100%" placeholder="เลือกได้สูงสุดกี่อย่าง (เว้นว่าง = ไม่จำกัด)" value="'+d('nf-gm-')+'">':'')+
-    '<textarea id="nf-go-'+id+'" class="inp" rows="5" style="margin-top:8px;width:100%" placeholder="ตัวเลือก 1 บรรทัดต่อ 1 อย่าง ใส่ราคาท้ายบรรทัดได้ เช่น&#10;S ครีมชีส 1 สกู๊ป 89&#10;M ครีมชีส 2 สกู๊ป 129&#10;ไม่ใส่ราคา = ไม่คิดเพิ่ม">'+d('nf-go-')+'</textarea>'+
+    '<textarea id="nf-go-'+id+'" class="inp" rows="5" style="margin-top:8px;width:100%" placeholder="ตัวเลือก 1 บรรทัดต่อ 1 อย่าง ใส่ราคาท้ายบรรทัดได้ เช่น&#10;S ครีมชีส 1 สกู๊ป 89&#10;M ครีมชีส 2 สกู๊ป 129&#10;ไม่ใส่ราคา = ไม่คิดเพิ่ม&#10;&#10;ตัวอย่างพิเศษ:&#10;S ครีมชีส 1 สกู๊ป 89 [ผลไม้=2] → เลือกไซส์นี้แล้วเลือกหัวข้อที่ชื่อมีคำว่า ผลไม้ ได้ 2 อย่าง&#10;ผลไม้เพิ่ม 10 {@ผลไม้} → ราคา 10 และต้องเลือกว่าใส่ผลไม้อะไร (ดึงจากหัวข้อผลไม้)&#10;ซอส 5 {มะนาว,พริก} → ระบุเองได้">'+d('nf-go-')+'</textarea>'+
     '<button class="btn" style="margin-top:8px" data-act="addgrp" data-id="'+id+'">+ เพิ่มหัวข้อ</button></div>'+
     '<button class="btn pri" style="margin-top:10px" data-act="addform" data-id="'+id+'"'+(S.canWrite?'':' disabled')+'>+ เพิ่มเมนู</button></div>';
 }
+function parseOpt(x,sid){var sub=null,lim=null,bad=false;
+  x=x.replace(/\{([^}]*)\}/,function(_,a){a=a.trim();if(a.charAt(0)==='@'){var k=a.slice(1).trim(),gr=(S.fgroups[sid]||[]).find(function(g){return g.name.indexOf(k)>=0});sub=gr?gr.options.map(function(o){return o.name}):[];if(!gr)bad=true}else sub=a.split(/[,，]/).map(function(z){return z.trim()}).filter(Boolean);return ''}).trim();
+  x=x.replace(/\[([^\]]*)\]/,function(_,a){lim={};a.split(/[,，]/).forEach(function(p){var m=p.split('='),n=parseInt(m[1],10);if(m[0].trim()&&n>0)lim[m[0].trim()]=n});return ''}).trim();
+  var m=x.match(FRE),o=m?{name:m[1].trim(),price:Number(m[2])}:{name:x,price:0};
+  if(sub&&sub.length)o.sub=sub;if(lim&&Object.keys(lim).length)o.lim=lim;if(bad)o.bad=true;return o}
 function addGrp(sid){
   var g=function(k){return (S.drafts[k+sid]||'').trim()};
   var name=g('nf-gn-'),kind=S.drafts['nf-gk-'+sid]||'one-req',mx=parseInt(g('nf-gm-'),10);
-  var opts=(S.drafts['nf-go-'+sid]||'').split('\n').map(function(x){return x.trim()}).filter(Boolean).map(function(x){var m=x.match(FRE);return m?{name:m[1].trim(),price:Number(m[2])}:{name:x,price:0}});
+  var opts=(S.drafts['nf-go-'+sid]||'').split('\n').map(function(x){return x.trim()}).filter(Boolean).map(function(x){return parseOpt(x,sid)});
+  if(opts.some(function(o){return o.bad})){toast('หา หัวข้อที่อ้างใน { } ไม่เจอ ต้องเพิ่มหัวข้อนั้นก่อน');return false}
   if(!name){toast('ใส่ชื่อหัวข้อก่อน');return false}
   if(!opts.length){toast('ใส่ตัวเลือกอย่างน้อย 1 อย่าง');return false}
   var G=S.fgroups[sid]||(S.fgroups[sid]=[]);
@@ -346,7 +357,7 @@ async function addForm(sid){
   if(!name){toast('ใส่ชื่อเมนูก่อน');render();return}
   if(!G.length){toast('เพิ่มหัวข้ออย่างน้อย 1 หัวข้อ');render();return}
   await guard(async function(){
-    var doc={shopId:sid,name:name,price:null,groups:G.map(function(g){return {name:g.name,type:g.type,req:g.req,max:g.max,options:g.options.map(function(o){return {name:o.name,price:o.price}})}}),ts:Date.now()};
+    var doc={shopId:sid,name:name,price:null,groups:G.map(function(g){return {name:g.name,type:g.type,req:g.req,max:g.max,options:g.options.map(function(o){return Object.assign({},o)})}}),ts:Date.now()};
     delete S.drafts['nf-name-'+sid];S.fgroups[sid]=[];toast('เพิ่มเมนูแล้ว');
     await db.collection('items').add(doc);
   });
@@ -773,7 +784,8 @@ document.addEventListener('click',function(e){
     case 'addgrp':addGrp(id);break;
     case 'rmgrp':(S.fgroups[id]||[]).splice(+t.dataset.f,1);render();break;
     case 'addform':addForm(id);break;
-    case 'fsel':{var fi=S.items.find(function(x){return x.id===id}),fr=(S.crows[id]||[])[+t.dataset.r];if(fi&&fr){var fg=+t.dataset.g,fo=+t.dataset.o,gg=fi.groups[fg];fr.g=fr.g||{};var fs=(fr.g[fg]||[]).slice(),fx=fs.indexOf(fo);if(gg.type==='many'){if(fx>=0)fs.splice(fx,1);else if(gg.max&&fs.length>=gg.max)toast('เลือกได้ไม่เกิน '+gg.max+' อย่าง');else fs.push(fo)}else{fs=(fx>=0&&!gg.req)?[]:[fo]}fr.g[fg]=fs}render();break}
+    case 'fsel':{var fi=S.items.find(function(x){return x.id===id}),fr=(S.crows[id]||[])[+t.dataset.r];if(fi&&fr){var fg=+t.dataset.g,fo=+t.dataset.o,gg=fi.groups[fg];fr.g=fr.g||{};var fs=(fr.g[fg]||[]).slice(),fx=fs.indexOf(fo);if(gg.type==='many'){if(fx>=0)fs.splice(fx,1);else{var fm=fmax(fi,fr,fg);if(fm&&fs.length>=fm)toast('เลือกได้ไม่เกิน '+fm+' อย่าง');else fs.push(fo)}}else{fs=(fx>=0&&!gg.req)?[]:[fo]}fr.g[fg]=fs;fr.s=fr.s||{};fi.groups.forEach(function(g2,k2){var s2=fsel(fr,k2),m2=g2.type==='many'?fmax(fi,fr,k2):0;if(m2&&s2.length>m2){fr.g[k2]=s2.slice(0,m2);toast('ปรับ '+g2.name+' ให้เหลือ '+m2+' อย่างตามที่เลือก')}});Object.keys(fr.s).forEach(function(key){var p=key.split('-');if(fsel(fr,+p[0]).indexOf(+p[1])<0)delete fr.s[key]})}render();break}
+    case 'fsub':{var fr2=(S.crows[id]||[])[+t.dataset.r];if(fr2){fr2.s=fr2.s||{};fr2.s[t.dataset.g+'-'+t.dataset.o]=+t.dataset.s}render();break}
     case 'addpart':addPart(id);break;
     case 'rmpart':(S.cparts[id]||[]).splice(+t.dataset.f,1);render();break;
     case 'addcombo':addCombo(id);break;
