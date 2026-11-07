@@ -382,9 +382,10 @@ function summaryHTML(){
       h+='<div class="group"><div class="ghead"><span>'+esc(g.head)+'</span><small>'+sm.q+' ชิ้น'+(sm.hp?' · '+money(sm.t):'')+'</small></div><ul class="glist">'+g.orders.map(function(o){return orowHTML(o,S.view)}).join('')+'</ul></div>';
     });
   }
-  h+='<div class="bar"><button class="btn pri" data-act="download"'+((!S.orders.length||S.dlBusy)?' disabled':'')+'>'+(S.dlBusy?'กำลังสร้างรูป...':'ดาวน์โหลดรายการ (3 รูป)')+'</button><button class="btn danger" data-act="clearask"'+((!S.orders.length||!S.canWrite)?' disabled':'')+'>ล้างรายการทั้งหมด</button></div>';
-  h+='<p class="note">ดาวน์โหลดจะได้ 3 รูป: สรุปตามร้าน, รายการของแต่ละคน, ยอดรวมที่ต้องซื้อ (ระบบถามยืนยันทีละรูป)</p>';
-  if(S.clearAsk)h+='<div class="confirm"><b>ล้างรายการสั่งซื้อทั้งหมด '+S.orders.length+' รายการ?</b><p class="note">ลบเฉพาะรายการสั่ง รายชื่อ ร้าน และเมนูยังอยู่สำหรับรอบถัดไป ย้อนกลับไม่ได้ ควรดาวน์โหลดรูปก่อน</p><div class="row" style="margin-top:8px"><button class="btn dangerfill" data-act="clearall"'+(S.busy?' disabled':'')+'>'+(S.busy?'กำลังลบ...':'ยืนยันล้างทั้งหมด')+'</button><button class="btn" data-act="clearcancel">ยกเลิก</button></div></div>';
+  h+='<div class="bar"><button class="btn pri" data-act="download"'+(!S.orders.length?' disabled':'')+'>'+(S.txtOpen?'ซ่อนข้อความสรุป':'ข้อความสรุป (ตามร้าน)')+'</button><button class="btn danger" data-act="clearask"'+((!S.orders.length||!S.canWrite)?' disabled':'')+'>ล้างรายการทั้งหมด</button></div>';
+  if(S.txtOpen&&S.orders.length)h+='<div class="panel"><textarea id="sumtxt" readonly rows="14" style="width:100%;font:inherit;font-size:15px;background:var(--bg);color:var(--ink);border:1px solid var(--line,#444);border-radius:8px;padding:10px;box-sizing:border-box">'+esc(summaryText())+'</textarea><div class="row" style="margin-top:8px"><button class="btn pri" data-act="copytxt">คัดลอกข้อความ</button></div></div>';
+  h+='<p class="note">กดปุ่มด้านบนเพื่อดูสรุปเป็นข้อความตามร้าน แล้วกดคัดลอกไปวางในแชทได้เลย</p>';
+  if(S.clearAsk)h+='<div class="confirm"><b>ล้างรายการสั่งซื้อทั้งหมด '+S.orders.length+' รายการ?</b><p class="note">ลบเฉพาะรายการสั่ง รายชื่อ ร้าน และเมนูยังอยู่สำหรับรอบถัดไป ย้อนกลับไม่ได้ ควรคัดลอกข้อความสรุปก่อน</p><div class="row" style="margin-top:8px"><button class="btn dangerfill" data-act="clearall"'+(S.busy?' disabled':'')+'>'+(S.busy?'กำลังลบ...':'ยืนยันล้างทั้งหมด')+'</button><button class="btn" data-act="clearcancel">ยกเลิก</button></div></div>';
   return h;
 }
 
@@ -420,7 +421,7 @@ async function confirmOrder(){
       var l=lines[k],it=l.item;
       var ex=S.orders.find(function(o){return o.person===S.person&&o.itemId===it.id&&(l.mix||sameSig(o,l))});
       if(l.mix){
-        if(ex){var nm={};Object.keys(ex.mix||{}).forEach(function(f){nm[f]=ex.mix[f]||0});Object.keys(l.mix).forEach(function(f){nm[f]=(nm[f]||0)+l.mix[f]});
+        if(false){var nm={};Object.keys(ex.mix||{}).forEach(function(f){nm[f]=ex.mix[f]||0});Object.keys(l.mix).forEach(function(f){nm[f]=(nm[f]||0)+l.mix[f]});
           await db.doc('orders/'+ex.id).update({mix:nm,qty:mixSum(nm)/it.size,price:it.price,size:it.size})}
         else await db.collection('orders').add({person:S.person,shopId:it.shopId,shopName:l.shop?l.shop.name:'',itemId:it.id,itemName:it.name,price:it.price==null?null:it.price,qty:l.qty,mix:l.mix,size:it.size,ts:Date.now()+k});
       }else if(ex)await db.doc('orders/'+ex.id).update({qty:ex.qty+l.qty,price:it.price==null?null:it.price});
@@ -570,6 +571,12 @@ async function makeSheet(title,subt,sections,grand){
   layout(c.getContext('2d'),true,title,subt,sections,grand);
   return new Promise(function(res){c.toBlob(res,'image/png')});
 }
+function summaryText(){
+  var L=['🛒 สรุปรายการสั่งซื้อ งานเจดีย์ปากน้ำ 2569',dateStr(),''];
+  groupOrders('shop').forEach(function(g,i){var sm=orderSum(g.orders);L.push((i+1)+'. '+g.head+' — '+sm.q+' ชิ้น'+(sm.hp?' · '+money(sm.t):''));
+    g.orders.forEach(function(o){var s=sub2(o);L.push('   • '+o.person+' · '+nameOf(o)+(o.mix?' ('+mixText(o.mix)+')':'')+' ×'+qtyLabel(o)+(s?' = '+s:''))});L.push('')});
+  return L.join('\n').trim();
+}
 function dateStr(){var d=new Date();return d.getDate()+'/'+(d.getMonth()+1)+'/'+(d.getFullYear()+543)}
 async function downloadAll(){
   if(!dl){toast('มุมมองนี้ดาวน์โหลดไม่ได้ ให้เปิดลิงก์ในแอป Claude');return}
@@ -646,7 +653,9 @@ document.addEventListener('click',function(e){
     case 'saveorder':saveOrder(id);break;
     case 'orderdelask':S.delAsk=id||null;S.editOrder=null;render();break;
     case 'delorder':guard(async function(){S.delAsk=null;toast('ลบรายการแล้ว');await db.doc('orders/'+id).delete()}).then(render);break;
-    case 'download':downloadAll();break;
+    case 'download':S.txtOpen=!S.txtOpen;render();break;
+    case 'copytxt':{var ta=$('sumtxt');if(ta){ta.focus();ta.select();try{ta.setSelectionRange(0,999999)}catch(e){}var ok=false;try{ok=document.execCommand('copy')}catch(e){}
+      if(ok)toast('คัดลอกแล้ว');else if(navigator.clipboard)navigator.clipboard.writeText(ta.value).then(function(){toast('คัดลอกแล้ว')},function(){toast('กดค้างที่ข้อความแล้วเลือกคัดลอก')});else toast('กดค้างที่ข้อความแล้วเลือกคัดลอก')}break}
     case 'clearask':S.clearAsk=true;render();break;
     case 'clearcancel':S.clearAsk=false;render();break;
     case 'clearall':clearAll();break;
