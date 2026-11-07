@@ -1,6 +1,6 @@
 /**
  * ระบบสั่งของงานเจดีย์ปากน้ำ 2569 — ฝั่งเซิร์ฟเวอร์ (Google Apps Script)
- * เก็บข้อมูลใน Google Sheet ที่สคริปต์นี้ผูกอยู่ (แท็บ people, shops, items, orders)
+ * เก็บข้อมูลใน Google Sheet (แท็บ people, shops, items, orders)
  * ใช้คู่กับไฟล์ Index.html
  */
 var COLS = ['people', 'shops', 'items', 'orders'];
@@ -112,4 +112,19 @@ function seedAll(json) {
     });
     return true;
   });
+}
+
+var API_ = { getAll: getAll, addDoc: addDoc, updateDoc: updateDoc, deleteDoc: deleteDoc, seedAll: seedAll };
+
+/** ให้หน้าเว็บที่โฮสต์ที่อื่น (เช่น GitHub Pages) เรียกใช้เป็น API (POST แบบ text/plain) */
+function doPost(e) {
+  var out;
+  try {
+    var req = JSON.parse(e.postData.contents);
+    if (!API_.hasOwnProperty(req.fn)) throw new Error('bad fn');
+    out = { ok: true, v: API_[req.fn].apply(null, req.args || []) };
+  } catch (err) {
+    out = { ok: false, m: String(err && err.message || err) };
+  }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
 }
