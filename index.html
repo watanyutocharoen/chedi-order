@@ -127,7 +127,7 @@ h2 .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radiu
 <script>
 (function(){
 'use strict';
-var S={crows:{},cparts:{},xrows:{},pick:{},amode:{},flv:{},people:[],shops:[],items:[],orders:[],loaded:{},cart:{},mix:{},person:'',pq:'',pOpen:false,pHi:0,
+var S={fgroups:{},crows:{},cparts:{},xrows:{},pick:{},amode:{},flv:{},people:[],shops:[],items:[],orders:[],loaded:{},cart:{},mix:{},person:'',pq:'',pOpen:false,pHi:0,
   tab:'order',view:'shop',open:null,drafts:{},editOrder:null,delAsk:null,editItem:null,delItem:null,editShop:null,
   clearAsk:false,busy:false,slow:false,canWrite:true,hasDb:true,dlBusy:false};
 var SEED={"people": [{"name": "อุ้ม", "ord": 1, "id": "p01"}, {"name": "ต้อย", "ord": 2, "id": "p02"}, {"name": "โบ", "ord": 3, "id": "p03"}, {"name": "น้ำตาล", "ord": 4, "id": "p04"}, {"name": "แกรม", "ord": 5, "id": "p05"}, {"name": "หนิง", "ord": 6, "id": "p06"}, {"name": "ปุ้ย", "ord": 7, "id": "p07"}, {"name": "เกรพ", "ord": 8, "id": "p08"}, {"name": "เทียน", "ord": 9, "id": "p09"}, {"name": "หญิง (ซาร่า)", "ord": 10, "id": "p10"}, {"name": "จอย", "ord": 11, "id": "p11"}, {"name": "แจง", "ord": 12, "id": "p12"}, {"name": "ฟาง", "ord": 13, "id": "p13"}, {"name": "อุ๊ก", "ord": 14, "id": "p14"}, {"name": "เก๋ (สิย่า)", "ord": 15, "id": "p15"}, {"name": "แหม่ม", "ord": 16, "id": "p16"}, {"name": "แพรว (เภ)", "ord": 17, "id": "p17"}, {"name": "นก (พรพรรณ)", "ord": 18, "id": "p18"}, {"name": "วิว", "ord": 19, "id": "p19"}, {"name": "แนท", "ord": 20, "id": "p20"}, {"name": "กร", "ord": 21, "id": "p21"}, {"name": "เมฆ", "ord": 22, "id": "p22"}, {"name": "ยีน", "ord": 23, "id": "p23"}, {"name": "แป้ง (เภ)", "ord": 24, "id": "p24"}, {"name": "นก (เภพาร์ทไทม์)", "ord": 25, "id": "p25"}, {"name": "แป๋ว", "ord": 26, "id": "p26"}, {"name": "หน่อง", "ord": 27, "id": "p27"}, {"name": "ผักบุ้ง", "ord": 28, "id": "p28"}, {"name": "พร (หม่อม)", "ord": 29, "id": "p29"}, {"name": "ตุ๊กตา (ป้าตา)", "ord": 30, "id": "p30"}, {"name": "ออน", "ord": 31, "id": "p31"}, {"name": "หมวย", "ord": 32, "id": "p32"}, {"name": "สมิน", "ord": 33, "id": "p33"}, {"name": "มุก", "ord": 34, "id": "p34"}, {"name": "มร", "ord": 35, "id": "p35"}, {"name": "แหวว", "ord": 36, "id": "p36"}, {"name": "กิ๊ฟ", "ord": 37, "id": "p37"}, {"name": "หวาน", "ord": 38, "id": "p38"}, {"name": "นัตตี้", "ord": 39, "id": "p39"}, {"name": "เบคอน", "ord": 40, "id": "p40"}, {"name": "โอ", "ord": 41, "id": "p41"}, {"name": "ป๋อม", "ord": 42, "id": "p42"}, {"name": "บาส", "ord": 43, "id": "p43"}, {"name": "อิ๋ว", "ord": 44, "id": "p44"}, {"name": "ดิว", "ord": 45, "id": "p45"}, {"name": "สตางค์", "ord": 46, "id": "p46"}, {"name": "พลอย", "ord": 47, "id": "p47"}, {"name": "เนิส", "ord": 48, "id": "p48"}, {"name": "แป้ง (น้อง)", "ord": 49, "id": "p49"}, {"name": "วา", "ord": 50, "id": "p50"}, {"name": "เกส", "ord": 51, "id": "p51"}, {"name": "แพรว (น้อง)", "ord": 52, "id": "p52"}, {"name": "คิง", "ord": 53, "id": "p53"}, {"name": "กล้วย", "ord": 54, "id": "p54"}], "shops": [{"name": "ลอดช่องตอกสด มหานคร", "ord": 15, "id": "mbusc7prdbtuuugdu6rc"}, {"name": "เบเกอรี่พระนคร", "ord": 1, "id": "s01"}, {"name": "แม่เกดกาละแม", "ord": 2, "id": "s02"}, {"name": "หมูแผ่นเจ๊เมย์", "ord": 3, "id": "s03"}, {"name": "หลี่เซียนสาลี่ตุ๋น", "ord": 4, "id": "s04"}, {"name": "ขนมต้มแม่มาลา", "ord": 5, "id": "s05"}, {"name": "โคตรเกี๊ยว", "ord": 6, "id": "s06"}, {"name": "เป็ดปักกิ่ง", "ord": 7, "id": "s07"}, {"name": "ชิฟฟ่อนไส้แตกบ้านคุณแม่", "ord": 8, "id": "s08"}, {"name": "ต้มยำปลาทู", "ord": 9, "id": "s09"}, {"name": "สรายุทธซูชิ ทาโก้", "ord": 10, "id": "s10"}, {"name": "กล้วยปิ้งเฉี่อยฉ่ำแฉะ", "ord": 11, "id": "s11"}, {"name": "เจ๊เบิร์ดหมูกรอบ", "ord": 12, "id": "s12"}, {"name": "เลมอนกินดี", "ord": 13, "id": "s13"}, {"name": "โดนัทญี่ปุ่น", "ord": 14, "id": "s14"}], "items": [{"name": "อกเป็ดรมควัน กล่องละ", "price": 200, "shopId": "s07", "ts": 1794030508792, "id": "21pr1aqplz937jw13jtt"}, {"name": "อกเป็ดรมควัน (กล่อง)", "price": 200, "shopId": "s07", "ts": 1794030539440, "id": "24rbcafwx3ki7l04sqsy"}, {"flavors": ["ดั้งเดิม", "ใบเตย"], "name": "ขนมตาลบีบสด (เล็ก)", "pick": 1, "price": 60, "shopId": "mbusc7prdbtuuugdu6rc", "ts": 1794031830812, "unit": "", "id": "56e64wkhomuokwsthyma"}, {"flavors": ["ดั้งเดิม", "ใบเตย"], "name": "ขนมตาลบีบสดใหญ่", "pick": 1, "price": 100, "shopId": "mbusc7prdbtuuugdu6rc", "ts": 1794031864580, "unit": "", "id": "9iwp3n2g1o8rswdpo5r0"}, {"flavors": ["กะทิ", "ใบเตย", "ดั้งเดิม"], "name": "กาละแม", "price": 100, "shopId": "s02", "size": 3, "ts": 100, "unit": "ชิ้น", "id": "b01"}, {"flavors": ["ต้มยำ", "หมาล่า", "ดั้งเดิม"], "name": "หมูแผ่น", "price": 100, "shopId": "s03", "size": 3, "ts": 100, "unit": "ถุง", "id": "b02"}, {"flavors": ["มะพร้าวอ่อน", "มะพร้าวอ่อนใบเตย", "ลูกชิด", "ชาไทย", "ฝอยทอง", "คัสตาร์ดข้าวโพด"], "name": "ชิฟฟ่อนไส้แตก ชุด 4 ชิ้น", "price": 100, "shopId": "s08", "size": 4, "ts": 100, "unit": "ชิ้น", "id": "b03"}, {"flavors": ["มะพร้าวอ่อน", "มะพร้าวอ่อนใบเตย", "ลูกชิด", "ชาไทย", "ฝอยทอง", "คัสตาร์ดข้าวโพด"], "name": "ชิฟฟ่อนไส้แตก ชุด 6 ชิ้น", "price": 150, "shopId": "s08", "size": 6, "ts": 101, "unit": "ชิ้น", "id": "b04"}, {"flavors": ["มะพร้าวอ่อน", "ข้าวโพด", "เผือก", "ลำไย", "ลอนตาล", "ลูกชก", "ดั้งเดิม"], "name": "กล้วยปิ้ง น้ำจิ้มล้น (ราดได้ 2 ซอส)", "pick": 2, "price": 60, "shopId": "s11", "ts": 100, "unit": "กล่อง", "id": "b06"}, {"name": "โดนัทญี่ปุ่น ซอสนม (1 กล่อง 5 ชิ้น พร้อมซอสดิป)", "price": 80, "shopId": "s14", "ts": 100, "id": "d01"}, {"name": "โดนัทญี่ปุ่น ซอสช็อกโกแลต (1 กล่อง 5 ชิ้น พร้อมซอสดิป)", "price": 80, "shopId": "s14", "ts": 101, "id": "d02"}, {"name": "โดนัทญี่ปุ่น ซอสสตรอเบอร์รี่ (1 กล่อง 5 ชิ้น พร้อมซอสดิป)", "price": 80, "shopId": "s14", "ts": 102, "id": "d03"}, {"name": "เกี๊ยวหมูไส้กุ้งสด 9 ชิ้น", "note": "งานเจดีย์ปากน้ำ 2568", "price": 100, "shopId": "s06", "ts": 1005, "id": "i05"}, {"name": "เกี๊ยวไส้กุ้งล้วน 6 ชิ้น", "note": "งานเจดีย์ปากน้ำ 2568", "price": 120, "shopId": "s06", "ts": 1006, "id": "i06"}, {"name": "ทอดมันกุ้ง", "note": "งานเจดีย์ปากน้ำ 2568", "price": 50, "shopId": "s06", "ts": 1007, "id": "i07"}, {"name": "ปลาทูสด (ตัวละ)", "note": "งานเจดีย์ปากน้ำ 2568", "price": 10, "shopId": "s09", "ts": 1015, "id": "i15"}, {"name": "ค่าต้มยำพร้อมปรุง", "note": "งานเจดีย์ปากน้ำ 2568 ยังไม่ทราบว่าคิดต่อตัวหรือต่อถ้วย", "price": 15, "shopId": "s09", "ts": 1016, "id": "i16"}, {"name": "เพิ่มเห็ด", "note": "งานเจดีย์ปากน้ำ 2568", "price": 10, "shopId": "s09", "ts": 1017, "id": "i17"}, {"name": "น้ำเลม่อนดองน้ำผึ้ง แบบขวด", "note": "งานเจดีย์ปากน้ำ 2568", "price": 40, "shopId": "s13", "ts": 1020, "id": "i20"}, {"name": "น้ำเลม่อนดองน้ำผึ้ง แบบขวด 3 ขวด", "note": "งานเจดีย์ปากน้ำ 2568", "price": 100, "shopId": "s13", "ts": 1021, "id": "i21"}, {"name": "ชิฟฟ่อนโรลสังขยาลาวามะพร้าว", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 199, "shopId": "s01", "ts": 2001, "id": "j01"}, {"name": "พายมะพร้าวอ่อน", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 150, "shopId": "s01", "ts": 2002, "id": "j02"}, {"name": "ทาร์ตไข่ออริจินัล 3 ชิ้น", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 100, "shopId": "s01", "ts": 2003, "id": "j03"}, {"name": "สาลี่ตุ๋น", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 69, "shopId": "s04", "ts": 2010, "id": "j10"}, {"name": "สาลี่ตุ๋นแปดเซียน", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 149, "shopId": "s04", "ts": 2011, "id": "j11"}, {"name": "สาลี่ตุ๋น 3 ถ้วย", "note": "รายการสั่งครั้งก่อน ผู้สั่งไม่แน่ใจราคา (จดว่า 'เหมือนจะ') ตรวจที่ร้านอีกที", "price": 100, "shopId": "s04", "ts": 2012, "id": "j12"}, {"name": "ขนมต้มใหญ่", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 100, "shopId": "s05", "ts": 2013, "id": "j13"}, {"name": "ขนมต้มเล็ก", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 70, "shopId": "s05", "ts": 2014, "id": "j14"}, {"name": "ทองม้วนกรอบห่อสด (คละไส้)", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 100, "shopId": "s05", "ts": 2015, "id": "j15"}, {"name": "เป็ดปักกิ่ง ชุดใหญ่", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 200, "shopId": "s07", "ts": 2016, "id": "j16"}, {"name": "เป็ดปักกิ่ง รายคำ (คำละ 25 ใส่จำนวนเป็นคำ)", "note": "รายการสั่งครั้งก่อน (งานปากน้ำ)", "price": 25, "shopId": "s07", "ts": 2017, "id": "j17"}, {"name": "ทอดมันกุ้ง (ใหญ่)", "price": 100, "shopId": "s06", "ts": 1794031649488, "id": "nak51ucn7ybu77sh8vou"}, {"name": "เป็ดรมควัน (กล่อง)", "price": 200, "shopId": "s07", "ts": 1794031204589, "id": "o5yc4h75p4ejh5j5d64b"}, {"name": "ทาร์ตไข่ออริจินัล 1 ชิ้น", "price": 35, "shopId": "s01", "ts": 1794029330613, "id": "pive88e64cc7r9zy4h35"}, {"name": "เป็ดรมควัน", "price": 200, "shopId": "s07", "ts": 1794031702193, "id": "q2hjsca9k3hcs7rpb3c0"}, {"name": "สาหร่ายญี่ปุ่น ซอสไข่เค็ม", "price": 79, "shopId": "s10", "ts": 300, "id": "t01"}, {"name": "ไข่หวานฟรุ๊ตสลัด", "price": 79, "shopId": "s10", "ts": 301, "id": "t02"}, {"name": "แซลมอนฟรุ๊ตสลัดมาโย (เมนูแนะนำ)", "price": 89, "shopId": "s10", "ts": 302, "id": "t03"}, {"name": "ปลาหมึกคาราเกะ", "price": 109, "shopId": "s10", "ts": 303, "id": "t04"}, {"name": "ปลาไหลย่างเบิร์นไฟ", "price": 109, "shopId": "s10", "ts": 304, "id": "t05"}, {"name": "กุ้งเทมปุระ ซอสเห็ดทรัฟเฟิล", "price": 109, "shopId": "s10", "ts": 305, "id": "t06"}, {"name": "แซลมอนเบิร์น เทริยากิ", "price": 129, "shopId": "s10", "ts": 306, "id": "t07"}, {"name": "แซลมอน ซอสมาโยไข่กุ้ง", "price": 129, "shopId": "s10", "ts": 307, "id": "t08"}, {"name": "เพิ่มชีสเบิร์น (บวกเพิ่มต่อกล่อง)", "price": 20, "shopId": "s10", "ts": 308, "id": "t09"}, {"name": "ทาร์ตไข่ออริจินัล 1 ชิ้น", "price": 35, "shopId": "s01", "ts": 1794028900131, "id": "w5zrdalqybdeaejlyhzn"}], "orders": [{"itemId": "j13", "itemName": "ขนมต้มใหญ่", "person": "แกรม", "pick": null, "price": 100, "qty": 1, "shopId": "s05", "shopName": "ขนมต้มแม่มาลา", "ts": 1794032582411, "id": "acj261sc2sbu15q66n3l"}, {"itemId": "b01", "itemName": "กาละแม", "mix": {"กะทิ": 0, "ดั้งเดิม": 3, "ใบเตย": 0}, "person": "แกรม", "price": 100, "qty": 1, "shopId": "s02", "shopName": "แม่เกดกาละแม", "size": 3, "ts": 1794032581800, "id": "qv5f09e0sf4i847gfpab"}, {"itemId": "b06", "itemName": "กล้วยปิ้ง น้ำจิ้มล้น", "person": "แกรม", "pick": ["มะพร้าวอ่อน", "ลูกชก"], "price": 60, "qty": 1, "shopId": "s11", "shopName": "กล้วยปิ้งเฉี่อยฉ่ำแฉะ", "ts": 1794032582993, "id": "s17btwrhvfoop6qb037g"}]};
@@ -154,14 +154,39 @@ function pieces(o){return o.mix?mixSum(o.mix):o.qty}
 function qtyLabel(o){return (o.mix||o.cpt)?o.qty+' ชุด':String(o.qty)}
 function bundleLabel(i){return i.size===1?'1 '+((!i.unit||i.unit==='ชิ้น')?'ชุด':i.unit)+' '+i.price+' บาท':'1 ชุด '+i.size+' '+(i.unit||'ชิ้น')+' '+i.price+' บาท'}
 function isC(i){return !!(i&&i.parts&&i.parts.length)}
+function isF(i){return !!(i&&i.groups&&i.groups.length)}
+function isCF(i){return isC(i)||isF(i)}
+function fsel(r,g){return (r.g&&r.g[g])||[]}
+function fopt(i,gi,o){return (i.groups[gi].options[o])||{name:'',price:0}}
+function fprice(i,r){var t=0;i.groups.forEach(function(g,gi){fsel(r,gi).forEach(function(o){t+=Number(fopt(i,gi,o).price)||0})});return t}
+function fbad(i,r){return i.groups.some(function(g,gi){return g.req&&!fsel(r,gi).length})}
+function ftext(i,r){var a=[];i.groups.forEach(function(g,gi){var s=fsel(r,gi).map(function(o){var op=fopt(i,gi,o);return op.name+(Number(op.price)>0?' '+op.price+' บาท':'')});if(s.length)a.push(g.name+': '+s.join(', '))});return a.join(' | ')}
+function fcopy(i,r){var o={};i.groups.forEach(function(g,gi){var s=fsel(r,gi).map(function(k){return fopt(i,gi,k).name});if(s.length)o[g.name]=s});return o}
 function crowsOf(i){var a=S.crows[i.id];if(!a||!a.length)a=S.crows[i.id]=[newCrow(i,0)];return a}
-function newCrow(i,q){var c={};i.parts.forEach(function(p){c[p.name]=p.kind==='num'?1:0});return {q:q,c:c}}
+function newCrow(i,q){if(isF(i))return {q:q,g:{}};var c={};i.parts.forEach(function(p){c[p.name]=p.kind==='num'?1:0});return {q:q,c:c}}
 function cq(id){return (S.crows[id]||[]).reduce(function(a,r){return a+(r.q>0?r.q:0)},0)}
 function ccount(p,r){return p.kind==='req'?1:(r.c[p.name]>0?r.c[p.name]:0)}
-function cprice(i,r){return i.parts.reduce(function(a,p){return a+(Number(p.price)||0)*ccount(p,r)},0)}
-function ctext(i,r){var a=[];i.parts.forEach(function(p){var n=ccount(p,r);if(!n)return;a.push((p.kind==='num'?p.name+' '+n+(p.unit?' '+p.unit:''):p.name)+(p.price!=null&&p.price!==''?(p.kind==='num'?' = ':' ')+(Number(p.price)*n)+' บาท':''))});return a.join(' + ')}
-function ccopy(i,r){var o={};i.parts.forEach(function(p){var n=ccount(p,r);if(n)o[p.name]=n});return o}
+function cprice(i,r){if(isF(i))return fprice(i,r);return i.parts.reduce(function(a,p){return a+(Number(p.price)||0)*ccount(p,r)},0)}
+function ctext(i,r){if(isF(i))return ftext(i,r);var a=[];i.parts.forEach(function(p){var n=ccount(p,r);if(!n)return;a.push((p.kind==='num'?p.name+' '+n+(p.unit?' '+p.unit:''):p.name)+(p.price!=null&&p.price!==''?(p.kind==='num'?' = ':' ')+(Number(p.price)*n)+' บาท':''))});return a.join(' + ')}
+function ccopy(i,r){if(isF(i))return fcopy(i,r);var o={};i.parts.forEach(function(p){var n=ccount(p,r);if(n)o[p.name]=n});return o}
+function frowsHTML(i){
+  var h='',rows=crowsOf(i);
+  rows.forEach(function(r,ri){
+    var pp=fprice(i,r),bad=fbad(i,r);
+    h+='<div class="xrow"><div class="fr" style="width:100%"><b>แบบที่ '+(ri+1)+'</b>'+(ri>0?'<button class="link" data-act="crm" data-id="'+i.id+'" data-r="'+ri+'">ลบแบบนี้</button>':'')+'</div>'+
+      '<div class="fr" style="width:100%"><span>จำนวนชุด</span><div class="qty"><button type="button" data-act="cdec" data-id="'+i.id+'" data-r="'+ri+'" aria-label="ลด">−</button><input id="cq-'+i.id+'-'+ri+'" type="number" inputmode="numeric" min="0" value="'+(r.q>0?r.q:0)+'" aria-label="จำนวนชุด แบบที่ '+(ri+1)+'"><button type="button" data-act="cinc" data-id="'+i.id+'" data-r="'+ri+'" aria-label="เพิ่ม">+</button></div></div>';
+    i.groups.forEach(function(g,gi){
+      var sel=fsel(r,gi);
+      h+='<div style="width:100%"><div class="note" style="margin:6px 0 2px"><b>'+esc(g.name)+'</b> <small>('+(g.type==='many'?'เลือกได้'+(g.max?'ไม่เกิน '+g.max+' อย่าง':'หลายอย่าง'):'เลือก 1')+(g.req?' · บังคับ':'')+')</small></div><div class="chips pk">';
+      g.options.forEach(function(o,oi){var on=sel.indexOf(oi)>=0;h+='<button type="button" class="pkb" data-act="fsel" data-id="'+i.id+'" data-r="'+ri+'" data-g="'+gi+'" data-o="'+oi+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(o.name)+(Number(o.price)>0?' '+o.price+'฿':'')+'</button>'});
+      h+='</div></div>';
+    });
+    h+='<div class="bsum">'+(bad&&r.q>0?'<b class="warn">ยังเลือกไม่ครบหัวข้อบังคับ</b> · ':'')+'ชุดละ <b>'+money(pp)+'</b>'+(r.q>0?' · '+r.q+' ชุด = <b>'+money(pp*r.q)+'</b>':'')+'</div></div>';
+  });
+  return h+'<button class="btn" style="margin-top:8px" data-act="cadd" data-id="'+i.id+'">+ สั่งเพิ่มอีกแบบ</button>';
+}
 function crowsHTML(i){
+  if(isF(i))return frowsHTML(i);
   var h='',rows=crowsOf(i);
   rows.forEach(function(r,ri){
     var pp=cprice(i,r);
@@ -207,8 +232,8 @@ function cartLines(){
     S.xrows[id].forEach(function(r){if(!(r.q>0))return;var pk=r.p.slice();out.push({item:it,shop:shopOf(it.shopId),qty:r.q,pick:pk,bad:!pk.length})});
   });
   Object.keys(S.crows).forEach(function(id){
-    var it=S.items.find(function(i){return i.id===id});if(!it||!isC(it))return;
-    S.crows[id].forEach(function(r){if(!(r.q>0))return;out.push({item:it,shop:shopOf(it.shopId),qty:r.q,combo:true,cpt:ctext(it,r),cp:ccopy(it,r),price:cprice(it,r)})});
+    var it=S.items.find(function(i){return i.id===id});if(!it||!isCF(it))return;
+    S.crows[id].forEach(function(r){if(!(r.q>0))return;out.push({item:it,shop:shopOf(it.shopId),qty:r.q,combo:true,bad:isF(it)&&fbad(it,r),cpt:ctext(it,r),cp:ccopy(it,r),price:cprice(it,r)})});
   });
   var seen={},res=[];
   out.forEach(function(l){if(l.combo){var k2=l.item.id+'|c|'+l.cpt;if(seen[k2]){seen[k2].qty+=l.qty;return}seen[k2]=l;res.push(l);return}if(l.pick&&!l.bad){var k=l.item.id+'|'+l.pick.slice().sort().join('+');if(seen[k]){seen[k].qty+=l.qty;return}seen[k]=l}res.push(l)});
@@ -216,7 +241,7 @@ function cartLines(){
   out.sort(function(a,b){return ((a.shop&&a.shop.ord)||0)-((b.shop&&b.shop.ord)||0)});
   return out;
 }
-function cartCountForShop(id){var n=0;itemsOf(id).forEach(function(i){n+=isC(i)?cq(i.id):isB(i)?mixSum(S.mix[i.id]):((S.cart[i.id]>0?S.cart[i.id]:0)+(isP(i)?xq(i.id):0))});return n}
+function cartCountForShop(id){var n=0;itemsOf(id).forEach(function(i){n+=isCF(i)?cq(i.id):isB(i)?mixSum(S.mix[i.id]):((S.cart[i.id]>0?S.cart[i.id]:0)+(isP(i)?xq(i.id):0))});return n}
 function sub(price,qty){return price!=null&&price!==''?Number(price)*qty:null}
 
 /* ---------- render ---------- */
@@ -273,11 +298,11 @@ function shopHTML(s){
     its.forEach(function(i){h+=itemHTML(i)});
     var dn='ni-name-'+s.id,dp='ni-price-'+s.id;
     var md=S.amode[s.id]||'single';
-    h+='<div class="seg" style="margin:14px 0 0" role="group" aria-label="แบบเมนูที่จะเพิ่ม"><button data-act="amode" data-id="'+s.id+'" data-v="single" aria-pressed="'+(md==='single')+'">เพิ่มเมนู 1 รายการ</button><button data-act="amode" data-id="'+s.id+'" data-v="bundle" aria-pressed="'+(md==='bundle')+'">เพิ่มเมนูแบบชุด (Bundle)</button><button data-act="amode" data-id="'+s.id+'" data-v="pick" aria-pressed="'+(md==='pick')+'">เพิ่มเมนูเลือกหน้า/น้ำราด</button><button data-act="amode" data-id="'+s.id+'" data-v="combo" aria-pressed="'+(md==='combo')+'">เพิ่มเมนูหลายอย่างต่อชุด</button></div>';
+    h+='<div class="seg" style="margin:14px 0 0" role="group" aria-label="แบบเมนูที่จะเพิ่ม"><button data-act="amode" data-id="'+s.id+'" data-v="single" aria-pressed="'+(md==='single')+'">เพิ่มเมนู 1 รายการ</button><button data-act="amode" data-id="'+s.id+'" data-v="bundle" aria-pressed="'+(md==='bundle')+'">เพิ่มเมนูแบบชุด (Bundle)</button><button data-act="amode" data-id="'+s.id+'" data-v="pick" aria-pressed="'+(md==='pick')+'">เพิ่มเมนูเลือกหน้า/น้ำราด</button><button data-act="amode" data-id="'+s.id+'" data-v="combo" aria-pressed="'+(md==='combo')+'">เพิ่มเมนูหลายอย่างต่อชุด</button><button data-act="amode" data-id="'+s.id+'" data-v="form" aria-pressed="'+(md==='form')+'">เพิ่มเมนูแบบฟอร์มหลายหัวข้อ</button></div>';
     if(md==='single'){
       h+='<div class="addform"><input id="'+dn+'" class="inp" placeholder="ชื่อเมนู" value="'+esc(S.drafts[dn]||'')+'"><input id="'+dp+'" class="inp" type="number" inputmode="decimal" min="0" placeholder="ราคา" value="'+esc(S.drafts[dp]||'')+'"><button class="btn pri" data-act="additem" data-id="'+s.id+'"'+(S.canWrite?'':' disabled')+'>+ เพิ่มเมนู</button></div>';
       h+='<p class="note">ราคาใส่ตามที่ร้านขายในงานเท่านั้น เว้นว่างได้ถ้ายังไม่ทราบ</p>';
-    }else if(md==='combo')h+=comboFormHTML(s);else h+=bundleFormHTML(s,md);
+    }else if(md==='combo')h+=comboFormHTML(s);else if(md==='form')h+=formFormHTML(s);else h+=bundleFormHTML(s,md);
     if(S.editShop===s.id){
       var en='es-name-'+s.id;
       h+='<div class="confirm" style="background:var(--surface);border-color:var(--line)"><div class="row"><input id="'+en+'" class="inp" style="flex:1 1 180px" value="'+esc(S.drafts[en]!=null?S.drafts[en]:s.name)+'"><label class="btn sm" for="ph-'+s.id+'">เลือกรูปร้าน</label><input id="ph-'+s.id+'" type="file" accept="image/*" hidden></div><div class="row" style="margin-top:8px"><button class="btn pri sm" data-act="saveshop" data-id="'+s.id+'">บันทึกร้าน</button><button class="btn sm" data-act="shopedit" data-id="">ปิด</button></div></div>';
@@ -289,6 +314,44 @@ function shopHTML(s){
   return h+'</article>';
 }
 
+var FRE=/^(.*\S)\s+(\d+(?:\.\d+)?)\s*(?:บาท|฿|B)?$/i;
+function formFormHTML(s){
+  var id=s.id,G=S.fgroups[id]||[],d=function(k,def){var v=S.drafts[k+id];return esc(v!=null?v:(def||''))},kk=S.drafts['nf-gk-'+id]||'one-req';
+  var KL={'one-req':'เลือก 1 อย่าง (บังคับ)','one':'เลือก 1 อย่าง (ไม่บังคับ)','many':'เลือกได้หลายอย่าง (ไม่บังคับ)'};
+  var chips=G.map(function(g,k){return '<span class="chip">'+esc(g.name)+': '+esc(g.options.map(function(o){return o.name+(Number(o.price)>0?' '+o.price:'')}).join(', '))+' · '+(g.type==='many'?'หลายอย่าง'+(g.max?' ≤'+g.max:''):'เลือก 1')+(g.req?' บังคับ':'')+'<button type="button" data-act="rmgrp" data-id="'+id+'" data-f="'+k+'" aria-label="ลบหัวข้อ '+esc(g.name)+'">×</button></span>'}).join('');
+  return '<div class="bform"><p class="note" style="margin:0 0 8px">เมนูแบบฟอร์ม มีหลายหัวข้อให้เลือก เช่น โมจิครีมชีส: เลือกไซส์ (ราคา) → เลือกครีมชีส → เลือกผลไม้ → ท็อปปิ้งเพิ่ม และสั่งเพิ่มได้หลายแบบ</p>'+
+    '<input id="nf-name-'+id+'" class="inp" placeholder="ชื่อเมนู เช่น โมจิครีมชีส" value="'+d('nf-name-')+'">'+
+    '<div class="bflv"><b>หัวข้อที่ให้เลือก</b>'+(chips?'<div class="chips">'+chips+'</div>':'<small class="note">ยังไม่มี เพิ่มอย่างน้อย 1 หัวข้อ</small>')+
+    '<input id="nf-gn-'+id+'" class="inp" style="margin-top:8px;width:100%" placeholder="ชื่อหัวข้อ เช่น 1.เลือกไซส์" value="'+d('nf-gn-')+'">'+
+    '<select id="nf-gk-'+id+'" class="inp" style="margin-top:8px;width:100%">'+['one-req','one','many'].map(function(k){return '<option value="'+k+'"'+(kk===k?' selected':'')+'>'+KL[k]+'</option>'}).join('')+'</select>'+
+    (kk==='many'?'<input id="nf-gm-'+id+'" class="inp" type="number" inputmode="numeric" min="0" style="margin-top:8px;width:100%" placeholder="เลือกได้สูงสุดกี่อย่าง (เว้นว่าง = ไม่จำกัด)" value="'+d('nf-gm-')+'">':'')+
+    '<textarea id="nf-go-'+id+'" class="inp" rows="5" style="margin-top:8px;width:100%" placeholder="ตัวเลือก 1 บรรทัดต่อ 1 อย่าง ใส่ราคาท้ายบรรทัดได้ เช่น&#10;S ครีมชีส 1 สกู๊ป 89&#10;M ครีมชีส 2 สกู๊ป 129&#10;ไม่ใส่ราคา = ไม่คิดเพิ่ม">'+d('nf-go-')+'</textarea>'+
+    '<button class="btn" style="margin-top:8px" data-act="addgrp" data-id="'+id+'">+ เพิ่มหัวข้อ</button></div>'+
+    '<button class="btn pri" style="margin-top:10px" data-act="addform" data-id="'+id+'"'+(S.canWrite?'':' disabled')+'>+ เพิ่มเมนู</button></div>';
+}
+function addGrp(sid){
+  var g=function(k){return (S.drafts[k+sid]||'').trim()};
+  var name=g('nf-gn-'),kind=S.drafts['nf-gk-'+sid]||'one-req',mx=parseInt(g('nf-gm-'),10);
+  var opts=(S.drafts['nf-go-'+sid]||'').split('\n').map(function(x){return x.trim()}).filter(Boolean).map(function(x){var m=x.match(FRE);return m?{name:m[1].trim(),price:Number(m[2])}:{name:x,price:0}});
+  if(!name){toast('ใส่ชื่อหัวข้อก่อน');return false}
+  if(!opts.length){toast('ใส่ตัวเลือกอย่างน้อย 1 อย่าง');return false}
+  var G=S.fgroups[sid]||(S.fgroups[sid]=[]);
+  if(G.some(function(x){return x.name===name})){toast('มีหัวข้อชื่อนี้แล้ว');return false}
+  G.push({name:name,type:kind==='many'?'many':'one',req:kind==='one-req',max:kind==='many'&&mx>0?mx:0,options:opts});
+  ['nf-gn-','nf-gm-','nf-go-'].forEach(function(k){delete S.drafts[k+sid]});render();return true;
+}
+async function addForm(sid){
+  if((S.drafts['nf-gn-'+sid]||'').trim()&&(S.drafts['nf-go-'+sid]||'').trim())addGrp(sid);
+  var name=(S.drafts['nf-name-'+sid]||'').trim(),G=S.fgroups[sid]||[];
+  if(!name){toast('ใส่ชื่อเมนูก่อน');render();return}
+  if(!G.length){toast('เพิ่มหัวข้ออย่างน้อย 1 หัวข้อ');render();return}
+  await guard(async function(){
+    var doc={shopId:sid,name:name,price:null,groups:G.map(function(g){return {name:g.name,type:g.type,req:g.req,max:g.max,options:g.options.map(function(o){return {name:o.name,price:o.price}})}}),ts:Date.now()};
+    delete S.drafts['nf-name-'+sid];S.fgroups[sid]=[];toast('เพิ่มเมนูแล้ว');
+    await db.collection('items').add(doc);
+  });
+  render();
+}
 function comboFormHTML(s){
   var id=s.id,P=S.cparts[id]||[],d=function(k,def){var v=S.drafts[k+id];return esc(v!=null?v:(def||''))},kk=S.drafts['nc-pk-'+id]||'num';
   var KL={num:'ใส่จำนวนต่อชุด',req:'บังคับ (ชุดละ 1)',opt:'ไม่บังคับ (ติ๊กเลือก)'};
@@ -358,6 +421,9 @@ function itemHTML(i){
       '<div class="bsum"><b>หน้าที่ราด</b> ติ๊กเลือกได้สูงสุด '+i.pick+' อย่าง</div>'+
       '<div class="chips pk">'+pickChips(i,pk,'pick')+'</div>'+
       '<div class="bsum">'+(q0>0&&!pk.length?'<b class="warn">ยังไม่ได้เลือกหน้าที่ราด</b>':(pk.length?'เลือกแล้ว: '+esc(pk.join(' + ')):''))+'</div>'+xrowsHTML(i)+'<div class="tools">'+del+'</div></div>';
+  }
+  if(isF(i)){
+    return '<div class="item bundle"><div class="nm"><b>'+esc(i.name)+'</b><div class="pr">'+esc(i.groups.map(function(g){return g.name}).join(' · '))+'</div></div>'+crowsHTML(i)+'<div class="tools">'+del+'</div></div>';
   }
   if(isC(i)){
     return '<div class="item bundle"><div class="nm"><b>'+esc(i.name)+'</b><div class="pr">'+esc(i.parts.map(function(p){return p.name+' '+p.price+(p.kind==='num'&&p.unit?'/'+p.unit:'')+(p.kind==='req'?' (บังคับ)':p.kind==='opt'?' (เสริม)':'')}).join(' · '))+'</div></div>'+crowsHTML(i)+'<div class="tools">'+del+'</div></div>';
@@ -704,6 +770,10 @@ document.addEventListener('click',function(e){
     case 'xrm':(S.xrows[id]||[]).splice(+t.dataset.r,1);render();break;
     case 'xinc':case 'xdec':{var xr=(S.xrows[id]||[])[+t.dataset.r];if(xr)xr.q=Math.max(0,(xr.q||0)+(a==='xinc'?1:-1));render();break}
     case 'xpick':{var xi=S.items.find(function(x){return x.id===id}),xr2=(S.xrows[id]||[])[+t.dataset.r];if(xi&&xr2){var xf=xi.flavors[+t.dataset.f],xp=xr2.p.indexOf(xf);if(xp>-1)xr2.p.splice(xp,1);else if(xr2.p.length>=xi.pick)toast('เลือกหน้าที่ราดได้สูงสุด '+xi.pick+' อย่าง');else xr2.p.push(xf)}render();break}
+    case 'addgrp':addGrp(id);break;
+    case 'rmgrp':(S.fgroups[id]||[]).splice(+t.dataset.f,1);render();break;
+    case 'addform':addForm(id);break;
+    case 'fsel':{var fi=S.items.find(function(x){return x.id===id}),fr=(S.crows[id]||[])[+t.dataset.r];if(fi&&fr){var fg=+t.dataset.g,fo=+t.dataset.o,gg=fi.groups[fg];fr.g=fr.g||{};var fs=(fr.g[fg]||[]).slice(),fx=fs.indexOf(fo);if(gg.type==='many'){if(fx>=0)fs.splice(fx,1);else if(gg.max&&fs.length>=gg.max)toast('เลือกได้ไม่เกิน '+gg.max+' อย่าง');else fs.push(fo)}else{fs=(fx>=0&&!gg.req)?[]:[fo]}fr.g[fg]=fs}render();break}
     case 'addpart':addPart(id);break;
     case 'rmpart':(S.cparts[id]||[]).splice(+t.dataset.f,1);render();break;
     case 'addcombo':addCombo(id);break;
@@ -755,7 +825,7 @@ document.addEventListener('input',function(e){
   else if(id.indexOf('x-')===0){var a2=id.lastIndexOf('-'),xid=id.slice(2,a2),xr3=(S.xrows[xid]||[])[+id.slice(a2+1)];if(xr3){var v3=parseInt(el.value,10);xr3.q=v3>0?v3:0;render()}}
   else if(id.indexOf('m-')===0){var a1=id.lastIndexOf('-'),mid=id.slice(2,a1),bi2=S.items.find(function(x){return x.id===mid});if(bi2&&bi2.flavors){var v2=parseInt(el.value,10);(S.mix[mid]||(S.mix[mid]={}))[bi2.flavors[+id.slice(a1+1)]]=v2>0?v2:0;render()}}
   else if(id.indexOf('q-')===0){var v=parseInt(el.value,10);S.cart[id.slice(2)]=v>0?v:0;render()}
-  else if(id.indexOf('ni-')===0||id.indexOf('ei-')===0||id.indexOf('es-')===0||id.indexOf('eq-')===0||id.indexOf('em-')===0||id.indexOf('nb-')===0||id.indexOf('nc-')===0||id==='ns-name'){S.drafts[id]=el.value}
+  else if(id.indexOf('ni-')===0||id.indexOf('ei-')===0||id.indexOf('es-')===0||id.indexOf('eq-')===0||id.indexOf('em-')===0||id.indexOf('nb-')===0||id.indexOf('nc-')===0||id.indexOf('nf-')===0||id==='ns-name'){S.drafts[id]=el.value;if(id.indexOf('nf-gk-')===0)render()}
 });
 document.addEventListener('focusin',function(e){
   if(e.target.id==='pq'&&!S.pOpen){S.pOpen=true;S.pq='';render()}
