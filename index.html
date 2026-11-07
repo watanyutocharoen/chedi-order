@@ -409,7 +409,48 @@ function bundleFormHTML(s,mode){
     '<div class="addform" style="grid-template-columns:1fr auto;margin-top:8px"><input id="nb-flv-'+id+'" class="inp" placeholder="'+(pk?'พิมพ์ตัวเลือก เช่น มะพร้าวอ่อน':'พิมพ์รสชาติหรือไส้ เช่น กะทิ')+'" value="'+d('nb-flv-')+'"><button class="btn" data-act="addflv" data-id="'+id+'">'+(pk?'+ เพิ่มตัวเลือก':'+ เพิ่มรส')+'</button></div></div>'+
     '<button class="btn pri" style="margin-top:10px" data-act="addbundle" data-id="'+id+'"'+(S.canWrite?'':' disabled')+'>'+(pk?'+ เพิ่มเมนูเลือกหน้า':'+ เพิ่มเมนูชุด')+'</button></div>';
 }
+function optLine(o){return o.name+(Number(o.price)>0?' '+o.price:(/\s\d+$/.test(o.name)?' 0':''))+(o.lim?' ['+Object.keys(o.lim).map(function(k){return k+'='+o.lim[k]}).join(',')+']':'')+(o.sub&&o.sub.length?' {'+o.sub.join(',')+'}':'')}
+function formEditHTML(i){
+  var id=i.id,d=function(k,def){var v=S.drafts[k];return esc(v!=null?v:def)};
+  var KL={'one-req':'เลือก 1 อย่าง (บังคับ)','one':'เลือก 1 อย่าง (ไม่บังคับ)','many':'เลือกได้หลายอย่าง (ไม่บังคับ)'};
+  var h='<div class="item bundle"><div class="bform"><input id="ei-name-'+id+'" class="inp" value="'+d('ei-name-'+id,i.name)+'">';
+  i.groups.concat([null]).forEach(function(g,k){
+    var key=id+'-'+(g?k:'new'),kind=g?(g.type==='many'?'many':(g.req?'one-req':'one')):'one-req',kk=S.drafts['ef-gk-'+key]||kind;
+    h+='<div class="bflv"><b>'+(g?'หัวข้อที่ '+(k+1):'+ เพิ่มหัวข้อใหม่ (ถ้าต้องการ)')+'</b>'+
+      '<input id="ef-gn-'+key+'" class="inp" style="margin-top:6px;width:100%" placeholder="'+(g?'ชื่อหัวข้อ (ล้างชื่อ = ลบหัวข้อนี้)':'ชื่อหัวข้อใหม่')+'" value="'+d('ef-gn-'+key,g?g.name:'')+'">'+
+      '<select id="ef-gk-'+key+'" class="inp" style="margin-top:6px;width:100%">'+['one-req','one','many'].map(function(x){return '<option value="'+x+'"'+(kk===x?' selected':'')+'>'+KL[x]+'</option>'}).join('')+'</select>'+
+      '<input id="ef-gm-'+key+'" class="inp" type="number" inputmode="numeric" min="0" style="margin-top:6px;width:100%" placeholder="เลือกได้สูงสุดกี่อย่าง (เฉพาะแบบหลายอย่าง)" value="'+d('ef-gm-'+key,g&&g.max?g.max:'')+'">'+
+      '<textarea id="ef-go-'+key+'" class="inp" rows="5" style="margin-top:6px;width:100%" placeholder="ตัวเลือก 1 บรรทัดต่อ 1 อย่าง ราคาท้ายบรรทัด">'+d('ef-go-'+key,g?g.options.map(optLine).join('\n'):'')+'</textarea></div>';
+  });
+  return h+'<p class="note">ตัวเลือก: <code>ชื่อ ราคา [ผลไม้=2] {ตัวเลือกย่อย,...}</code> · แก้แล้วรายการที่เลือกค้างไว้ของเมนูนี้จะถูกล้าง ส่วนออเดอร์ที่ยืนยันแล้วไม่เปลี่ยน</p><div class="row" style="margin-top:8px"><button class="btn pri sm" data-act="saveform" data-id="'+id+'">บันทึก</button><button class="btn sm" data-act="itemedit" data-id="">ยกเลิก</button></div></div></div>';
+}
+async function saveForm(id){
+  var it=S.items.find(function(i){return i.id===id});if(!it)return;
+  var name=(S.drafts['ei-name-'+id]!=null?S.drafts['ei-name-'+id]:it.name).trim();
+  if(!name){toast('ชื่อเมนูว่างไม่ได้');return}
+  var ek='e-'+id,G=S.fgroups[ek]=[],bad=null;
+  it.groups.concat([null]).forEach(function(g,k){
+    var key=id+'-'+(g?k:'new'),dv=function(n,def){var v=S.drafts[n+key];return v!=null?v:def};
+    var gn=String(dv('ef-gn-',g?g.name:'')).trim();if(!gn||bad)return;
+    var kind=dv('ef-gk-',g?(g.type==='many'?'many':(g.req?'one-req':'one')):'one-req'),mx=parseInt(dv('ef-gm-',g&&g.max?g.max:''),10);
+    var opts=String(dv('ef-go-',g?g.options.map(optLine).join('\n'):'')).split('\n').map(function(x){return x.trim()}).filter(Boolean).map(function(x){return parseOpt(x,ek)});
+    if(!opts.length){bad='หัวข้อ '+gn+' ต้องมีตัวเลือกอย่างน้อย 1 อย่าง';return}
+    if(opts.some(function(o){return o.bad})){bad='หัวข้อที่อ้างใน { } ต้องอยู่ก่อนหน้า';return}
+    if(G.some(function(x){return x.name===gn})){bad='มีหัวข้อชื่อซ้ำ: '+gn;return}
+    G.push({name:gn,type:kind==='many'?'many':'one',req:kind==='one-req',max:kind==='many'&&mx>0?mx:0,options:opts});
+  });
+  delete S.fgroups[ek];
+  if(bad){toast(bad);return}
+  if(!G.length){toast('ต้องมีอย่างน้อย 1 หัวข้อ');return}
+  await guard(async function(){
+    Object.keys(S.drafts).forEach(function(k){if(k.indexOf('ef-')===0)delete S.drafts[k]});
+    delete S.drafts['ei-name-'+id];delete S.crows[id];S.editItem=null;toast('แก้ไขเมนูแล้ว');
+    await db.doc('items/'+id).update({name:name,groups:G});
+  });
+  render();
+}
 function itemHTML(i){
+  if(S.editItem===i.id&&isF(i))return formEditHTML(i);
   if(S.editItem===i.id){
     var dn='ei-name-'+i.id,dp='ei-price-'+i.id;
     return '<div class="item"><div class="addform" style="width:100%;margin:0"><input id="'+dn+'" class="inp" value="'+esc(S.drafts[dn]!=null?S.drafts[dn]:i.name)+'"><input id="'+dp+'" class="inp" type="number" inputmode="decimal" min="0" value="'+esc(S.drafts[dp]!=null?S.drafts[dp]:(i.price==null?'':i.price))+'"><button class="btn pri sm" data-act="saveitem" data-id="'+i.id+'">บันทึก</button></div>'+((isB(i)||isP(i))?'<input id="ei-flv-'+i.id+'" class="inp" style="width:100%;margin-top:8px" placeholder="รสชาติ/ไส้ คั่นด้วยจุลภาค" value="'+esc(S.drafts['ei-flv-'+i.id]!=null?S.drafts['ei-flv-'+i.id]:i.flavors.join(', '))+'"><p class="note">แก้รสได้ในช่องนี้ คั่นแต่ละรสด้วยเครื่องหมาย ,</p>':'')+'<div class="tools"><button class="link" data-act="itemedit" data-id="">ยกเลิก</button></div></div>';
@@ -801,7 +842,8 @@ document.addEventListener('click',function(e){
     case 'clearcart':S.cart={};S.mix={};S.pick={};S.xrows={};S.crows={};render();break;
     case 'additem':addItem(id);break;
     case 'addshop':addShop();break;
-    case 'itemedit':S.editItem=id||null;S.delItem=null;render();break;
+    case 'saveform':saveForm(id);break;
+    case 'itemedit':Object.keys(S.drafts).forEach(function(k){if(k.indexOf('ef-')===0)delete S.drafts[k]});S.editItem=id||null;S.delItem=null;render();break;
     case 'saveitem':saveItem(id);break;
     case 'itemdelask':S.delItem=id||null;render();break;
     case 'delitem':guard(async function(){delete S.cart[id];delete S.mix[id];delete S.pick[id];delete S.xrows[id];delete S.crows[id];S.delItem=null;toast('ลบเมนูแล้ว');await db.doc('items/'+id).delete()}).then(render);break;
@@ -837,7 +879,7 @@ document.addEventListener('input',function(e){
   else if(id.indexOf('x-')===0){var a2=id.lastIndexOf('-'),xid=id.slice(2,a2),xr3=(S.xrows[xid]||[])[+id.slice(a2+1)];if(xr3){var v3=parseInt(el.value,10);xr3.q=v3>0?v3:0;render()}}
   else if(id.indexOf('m-')===0){var a1=id.lastIndexOf('-'),mid=id.slice(2,a1),bi2=S.items.find(function(x){return x.id===mid});if(bi2&&bi2.flavors){var v2=parseInt(el.value,10);(S.mix[mid]||(S.mix[mid]={}))[bi2.flavors[+id.slice(a1+1)]]=v2>0?v2:0;render()}}
   else if(id.indexOf('q-')===0){var v=parseInt(el.value,10);S.cart[id.slice(2)]=v>0?v:0;render()}
-  else if(id.indexOf('ni-')===0||id.indexOf('ei-')===0||id.indexOf('es-')===0||id.indexOf('eq-')===0||id.indexOf('em-')===0||id.indexOf('nb-')===0||id.indexOf('nc-')===0||id.indexOf('nf-')===0||id==='ns-name'){S.drafts[id]=el.value;if(id.indexOf('nf-gk-')===0)render()}
+  else if(id.indexOf('ni-')===0||id.indexOf('ei-')===0||id.indexOf('es-')===0||id.indexOf('eq-')===0||id.indexOf('em-')===0||id.indexOf('nb-')===0||id.indexOf('nc-')===0||id.indexOf('nf-')===0||id.indexOf('ef-')===0||id==='ns-name'){S.drafts[id]=el.value;if(id.indexOf('nf-gk-')===0)render()}
 });
 document.addEventListener('focusin',function(e){
   if(e.target.id==='pq'&&!S.pOpen){S.pOpen=true;S.pq='';render()}
