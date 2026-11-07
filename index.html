@@ -1,4 +1,5 @@
-<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ฝากหิ้วงานเจดีย์ปากน้ำ</title>
+<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ฝากหิ้วงานเจดีย์ปากน้ำ</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -158,7 +159,7 @@ function newCrow(i,q){var c={};i.parts.forEach(function(p){c[p.name]=p.kind==='n
 function cq(id){return (S.crows[id]||[]).reduce(function(a,r){return a+(r.q>0?r.q:0)},0)}
 function ccount(p,r){return p.kind==='req'?1:(r.c[p.name]>0?r.c[p.name]:0)}
 function cprice(i,r){return i.parts.reduce(function(a,p){return a+(Number(p.price)||0)*ccount(p,r)},0)}
-function ctext(i,r){var a=[];i.parts.forEach(function(p){var n=ccount(p,r);if(!n)return;a.push(p.kind==='num'?p.name+' '+n+(p.unit?' '+p.unit:''):p.name)});return a.join(' + ')}
+function ctext(i,r){var a=[];i.parts.forEach(function(p){var n=ccount(p,r);if(!n)return;a.push((p.kind==='num'?p.name+' '+n+(p.unit?' '+p.unit:''):p.name)+(p.price!=null&&p.price!==''?(p.kind==='num'?' = ':' ')+(Number(p.price)*n)+' บาท':''))});return a.join(' + ')}
 function ccopy(i,r){var o={};i.parts.forEach(function(p){var n=ccount(p,r);if(n)o[p.name]=n});return o}
 function crowsHTML(i){
   var h='',rows=crowsOf(i);
@@ -169,7 +170,7 @@ function crowsHTML(i){
     i.parts.forEach(function(p,k){
       var pr=(p.price!=null&&p.price!==''?' '+p.price+' บาท':'');
       if(p.kind==='req')h+='<div class="fr" style="width:100%"><span>✓ '+esc(p.name)+pr+' <small class="note">(บังคับ ชุดละ 1)</small></span></div>';
-      else if(p.kind==='opt')h+='<div class="fr" style="width:100%"><span>'+esc(p.name)+pr+' <small class="note">(ไม่บังคับ)</small></span><button type="button" class="pkb" data-act="cptog" data-id="'+i.id+'" data-r="'+ri+'" data-k="'+k+'" aria-pressed="'+(r.c[p.name]>0)+'">'+(r.c[p.name]>0?'✓ เอา':'ไม่เอา')+'</button></div>';
+      else if(p.kind==='opt')h+='<div class="fr" style="width:100%"><span>'+esc(p.name)+pr+' <small class="note">(ไม่บังคับ)</small></span><div class="chips pk" style="margin:0"><button type="button" class="pkb" data-act="cpset" data-v="1" data-id="'+i.id+'" data-r="'+ri+'" data-k="'+k+'" aria-pressed="'+(r.c[p.name]>0)+'">'+(r.c[p.name]>0?'✓ ':'')+'เพิ่ม</button><button type="button" class="pkb" data-act="cpset" data-v="0" data-id="'+i.id+'" data-r="'+ri+'" data-k="'+k+'" aria-pressed="'+!(r.c[p.name]>0)+'">'+(r.c[p.name]>0?'':'✓ ')+'ไม่เพิ่ม</button></div></div>';
       else h+='<div class="fr" style="width:100%"><span>'+esc(p.name)+pr+(p.unit?' ต่อ'+esc(p.unit):'')+' <small class="note">(ต่อ 1 ชุด)</small></span><div class="qty"><button type="button" data-act="cpdec" data-id="'+i.id+'" data-r="'+ri+'" data-k="'+k+'" aria-label="ลด">−</button><input id="cp-'+i.id+'-'+ri+'-'+k+'" type="number" inputmode="numeric" min="0" value="'+(r.c[p.name]>0?r.c[p.name]:0)+'" aria-label="จำนวน '+esc(p.name)+'"><button type="button" data-act="cpinc" data-id="'+i.id+'" data-r="'+ri+'" data-k="'+k+'" aria-label="เพิ่ม">+</button></div></div>';
     });
     h+='<div class="bsum">ชุดละ <b>'+money(pp)+'</b>'+(r.q>0?' · '+r.q+' ชุด = <b>'+money(pp*r.q)+'</b>':'')+'</div></div>';
@@ -710,6 +711,7 @@ document.addEventListener('click',function(e){
     case 'crm':(S.crows[id]||[]).splice(+t.dataset.r,1);render();break;
     case 'cinc':case 'cdec':{var cr=(S.crows[id]||[])[+t.dataset.r];if(cr)cr.q=Math.max(0,(cr.q||0)+(a==='cinc'?1:-1));render();break}
     case 'cpinc':case 'cpdec':{var ci2=S.items.find(function(x){return x.id===id}),cr2=(S.crows[id]||[])[+t.dataset.r];if(ci2&&cr2){var pn=ci2.parts[+t.dataset.k].name;cr2.c[pn]=Math.max(0,(cr2.c[pn]||0)+(a==='cpinc'?1:-1))}render();break}
+    case 'cpset':{var ci4=S.items.find(function(x){return x.id===id}),cr6=(S.crows[id]||[])[+t.dataset.r];if(ci4&&cr6){cr6.c[ci4.parts[+t.dataset.k].name]=+t.dataset.v}render();break}
     case 'cptog':{var ci3=S.items.find(function(x){return x.id===id}),cr3=(S.crows[id]||[])[+t.dataset.r];if(ci3&&cr3){var pn3=ci3.parts[+t.dataset.k].name;cr3.c[pn3]=cr3.c[pn3]>0?0:1}render();break}
     case 'inc':S.cart[id]=(S.cart[id]||0)+1;render();break;
     case 'dec':S.cart[id]=Math.max(0,(S.cart[id]||0)-1);render();break;
