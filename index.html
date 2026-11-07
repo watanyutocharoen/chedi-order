@@ -1,5 +1,5 @@
-<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ฝากหิ้วงานเจดีย์ปากน้ำ</title>
+<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ฝากหิ้วงานเจดีย์ปากน้ำ</title>
+
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -574,7 +574,7 @@ async function makeSheet(title,subt,sections,grand){
 }
 function summaryText(){
   var L=['🛒 สรุปรายการสั่งซื้อ งานเจดีย์ปากน้ำ 2569',dateStr(),''];
-  groupOrders('shop').forEach(function(g,i){var sm=orderSum(g.orders);L.push((i+1)+'. '+g.head+' — '+sm.q+' ชิ้น'+(sm.hp?' · '+money(sm.t):''));
+  groupOrders('shop').forEach(function(g,i){var sm=orderSum(g.orders);L.push((i+1)+'. '+g.head);
     g.orders.forEach(function(o){var s=sub2(o);L.push('   • '+o.person+' · '+nameOf(o)+(o.mix?' ('+mixText(o.mix)+')':'')+' ×'+qtyLabel(o)+(s?' = '+s:''))});L.push('')});
   return L.join('\n').trim();
 }
