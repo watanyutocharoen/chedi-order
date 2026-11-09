@@ -159,7 +159,8 @@ function isCF(i){return isC(i)||isF(i)}
 function fsel(r,g){return (r.g&&r.g[g])||[]}
 function fopt(i,gi,o){return (i.groups[gi].options[o])||{name:'',price:0}}
 function fprice(i,r){var t=0;i.groups.forEach(function(g,gi){fsel(r,gi).forEach(function(o){t+=Number(fopt(i,gi,o).price)||0})});return t}
-function fmax(i,r,gi){var n=null,nm=i.groups[gi].name;i.groups.forEach(function(g,k){fsel(r,k).forEach(function(o){var l=fopt(i,k,o).lim;if(l)Object.keys(l).forEach(function(key){if(nm.indexOf(key)>=0)n=n==null?l[key]:Math.min(n,l[key])})})});return n!=null?n:(i.groups[gi].max||0)}
+function dlim(o){var l={};if(o.desc){var re=/([^\s+,\/|()]+)\s*(\d+)\s*(?:อย่าง|ชนิด)/g,m;while((m=re.exec(o.desc)))l[m[1]]=+m[2]}return l}
+function fmax(i,r,gi){var n=null,nm=i.groups[gi].name;i.groups.forEach(function(g,k){fsel(r,k).forEach(function(o){var op=fopt(i,k,o),l=Object.assign({},dlim(op),op.lim||{});Object.keys(l).forEach(function(key){if(nm.indexOf(key)>=0)n=n==null?l[key]:Math.min(n,l[key])})})});return n!=null?n:(i.groups[gi].max||0)}
 function fsub(i,r,gi,o){var op=fopt(i,gi,o);if(!op.sub||!op.sub.length)return '';var x=r.s&&r.s[gi+'-'+o];return x!=null&&op.sub[x]!=null?op.sub[x]:''}
 function fbad(i,r){return i.groups.some(function(g,gi){var s=fsel(r,gi);return (g.req&&!s.length)||s.some(function(o){var op=fopt(i,gi,o);return op.sub&&op.sub.length&&!fsub(i,r,gi,o)})})}
 function fname(i,r,gi,o){var op=fopt(i,gi,o),sb=fsub(i,r,gi,o);return op.name+(sb?' ('+sb+')':'')}
@@ -181,7 +182,7 @@ function frowsHTML(i){
     i.groups.forEach(function(g,gi){
       var sel=fsel(r,gi),fm=g.type==='many'?fmax(i,r,gi):0;
       h+='<div style="width:100%"><div class="note" style="margin:6px 0 2px"><b>'+esc(g.name)+'</b> <small>('+(g.type==='many'?'เลือกได้'+(fm?'ไม่เกิน '+fm+' อย่าง':'หลายอย่าง'):'เลือก 1')+(g.req?' · บังคับ':'')+')</small></div><div class="chips pk">';
-      g.options.forEach(function(o,oi){var on=sel.indexOf(oi)>=0;h+='<button type="button" class="pkb" data-act="fsel" data-id="'+i.id+'" data-r="'+ri+'" data-g="'+gi+'" data-o="'+oi+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(o.name)+(Number(o.price)>0?' '+o.price+'฿':'')+'</button>'});
+      g.options.forEach(function(o,oi){var on=sel.indexOf(oi)>=0;h+='<button type="button" class="pkb" data-act="fsel" data-id="'+i.id+'" data-r="'+ri+'" data-g="'+gi+'" data-o="'+oi+'" aria-pressed="'+on+'">'+(on?'✓ ':'')+esc(o.name)+(Number(o.price)>0?' '+o.price+'฿':'')+(o.desc?'<small style="display:block;font-weight:400;opacity:.75">'+esc(o.desc)+'</small>':'')+'</button>'});
       h+='</div>';
       sel.forEach(function(o){var op=fopt(i,gi,o);if(!(op.sub&&op.sub.length))return;h+='<div class="note" style="margin:6px 0 2px">'+esc(op.name)+' ใส่อะไร:</div><div class="chips pk">';op.sub.forEach(function(sn,si){var on2=fsub(i,r,gi,o)===sn;h+='<button type="button" class="pkb" data-act="fsub" data-id="'+i.id+'" data-r="'+ri+'" data-g="'+gi+'" data-o="'+o+'" data-s="'+si+'" aria-pressed="'+on2+'">'+(on2?'✓ ':'')+esc(sn)+'</button>'});h+='</div>'});
       h+='</div>';
@@ -330,15 +331,15 @@ function formFormHTML(s){
     '<input id="nf-gn-'+id+'" class="inp" style="margin-top:8px;width:100%" placeholder="ชื่อหัวข้อ เช่น 1.เลือกไซส์" value="'+d('nf-gn-')+'">'+
     '<select id="nf-gk-'+id+'" class="inp" style="margin-top:8px;width:100%">'+['one-req','one','many'].map(function(k){return '<option value="'+k+'"'+(kk===k?' selected':'')+'>'+KL[k]+'</option>'}).join('')+'</select>'+
     (kk==='many'?'<input id="nf-gm-'+id+'" class="inp" type="number" inputmode="numeric" min="0" style="margin-top:8px;width:100%" placeholder="เลือกได้สูงสุดกี่อย่าง (เว้นว่าง = ไม่จำกัด)" value="'+d('nf-gm-')+'">':'')+
-    '<textarea id="nf-go-'+id+'" class="inp" rows="5" style="margin-top:8px;width:100%" placeholder="ตัวเลือก 1 บรรทัดต่อ 1 อย่าง ใส่ราคาท้ายบรรทัดได้ เช่น&#10;S ครีมชีส 1 สกู๊ป 89&#10;M ครีมชีส 2 สกู๊ป 129&#10;ไม่ใส่ราคา = ไม่คิดเพิ่ม&#10;&#10;ตัวอย่างพิเศษ:&#10;S ครีมชีส 1 สกู๊ป 89 [ผลไม้=2] → เลือกไซส์นี้แล้วเลือกหัวข้อที่ชื่อมีคำว่า ผลไม้ ได้ 2 อย่าง&#10;ผลไม้เพิ่ม 10 {@ผลไม้} → ราคา 10 และต้องเลือกว่าใส่ผลไม้อะไร (ดึงจากหัวข้อผลไม้)&#10;ซอส 5 {มะนาว,พริก} → ระบุเองได้">'+d('nf-go-')+'</textarea>'+
+    '<textarea id="nf-go-'+id+'" class="inp" rows="5" style="margin-top:8px;width:100%" placeholder="ตัวเลือก 1 บรรทัดต่อ 1 อย่าง ใส่ราคาท้ายบรรทัดได้ เช่น&#10;S ครีมชีส 1 สกู๊ป 89&#10;M ครีมชีส 2 สกู๊ป 129&#10;ไม่ใส่ราคา = ไม่คิดเพิ่ม&#10;&#10;ตัวอย่างพิเศษ:&#10;S ครีมชีส 1 สกู๊ป 89 [ผลไม้=2] → เลือกไซส์นี้แล้วเลือกหัวข้อที่ชื่อมีคำว่า ผลไม้ ได้ 2 อย่าง&#10;ผลไม้เพิ่ม 10 {@ผลไม้} → ราคา 10 และต้องเลือกว่าใส่ผลไม้อะไร (ดึงจากหัวข้อผลไม้)&#10;ซอส 5 {มะนาว,พริก} → ระบุเองได้&#10;S 89 | ครีมชีส 1 สกู๊ป + ผลไม้ 2 อย่าง → คำอธิบายหลัง | แสดงข้างตัวเลือก ไม่ขึ้นในสรุป และจำกัดผลไม้ 2 อย่างให้อัตโนมัติ">'+d('nf-go-')+'</textarea>'+
     '<button class="btn" style="margin-top:8px" data-act="addgrp" data-id="'+id+'">+ เพิ่มหัวข้อ</button></div>'+
     '<button class="btn pri" style="margin-top:10px" data-act="addform" data-id="'+id+'"'+(S.canWrite?'':' disabled')+'>+ เพิ่มเมนู</button></div>';
 }
-function parseOpt(x,sid){var sub=null,lim=null,bad=false;
+function parseOpt(x,sid){var sub=null,lim=null,bad=false,desc='',di=x.indexOf('|');if(di>=0){desc=x.slice(di+1).trim();x=x.slice(0,di).trim()}
   x=x.replace(/\{([^}]*)\}/,function(_,a){a=a.trim();if(a.charAt(0)==='@'){var k=a.slice(1).trim(),gr=(S.fgroups[sid]||[]).find(function(g){return g.name.indexOf(k)>=0});sub=gr?gr.options.map(function(o){return o.name}):[];if(!gr)bad=true}else sub=a.split(/[,，]/).map(function(z){return z.trim()}).filter(Boolean);return ''}).trim();
   x=x.replace(/\[([^\]]*)\]/,function(_,a){lim={};a.split(/[,，]/).forEach(function(p){var m=p.split('='),n=parseInt(m[1],10);if(m[0].trim()&&n>0)lim[m[0].trim()]=n});return ''}).trim();
   var m=x.match(FRE),o=m?{name:m[1].trim(),price:Number(m[2])}:{name:x,price:0};
-  if(sub&&sub.length)o.sub=sub;if(lim&&Object.keys(lim).length)o.lim=lim;if(bad)o.bad=true;return o}
+  if(sub&&sub.length)o.sub=sub;if(lim&&Object.keys(lim).length)o.lim=lim;if(desc)o.desc=desc;if(bad)o.bad=true;return o}
 function addGrp(sid){
   var g=function(k){return (S.drafts[k+sid]||'').trim()};
   var name=g('nf-gn-'),kind=S.drafts['nf-gk-'+sid]||'one-req',mx=parseInt(g('nf-gm-'),10);
@@ -409,7 +410,7 @@ function bundleFormHTML(s,mode){
     '<div class="addform" style="grid-template-columns:1fr auto;margin-top:8px"><input id="nb-flv-'+id+'" class="inp" placeholder="'+(pk?'พิมพ์ตัวเลือก เช่น มะพร้าวอ่อน':'พิมพ์รสชาติหรือไส้ เช่น กะทิ')+'" value="'+d('nb-flv-')+'"><button class="btn" data-act="addflv" data-id="'+id+'">'+(pk?'+ เพิ่มตัวเลือก':'+ เพิ่มรส')+'</button></div></div>'+
     '<button class="btn pri" style="margin-top:10px" data-act="addbundle" data-id="'+id+'"'+(S.canWrite?'':' disabled')+'>'+(pk?'+ เพิ่มเมนูเลือกหน้า':'+ เพิ่มเมนูชุด')+'</button></div>';
 }
-function optLine(o){return o.name+(Number(o.price)>0?' '+o.price:(/\s\d+$/.test(o.name)?' 0':''))+(o.lim?' ['+Object.keys(o.lim).map(function(k){return k+'='+o.lim[k]}).join(',')+']':'')+(o.sub&&o.sub.length?' {'+o.sub.join(',')+'}':'')}
+function optLine(o){return o.name+(Number(o.price)>0?' '+o.price:(/\s\d+$/.test(o.name)?' 0':''))+(o.lim?' ['+Object.keys(o.lim).map(function(k){return k+'='+o.lim[k]}).join(',')+']':'')+(o.sub&&o.sub.length?' {'+o.sub.join(',')+'}':'')+(o.desc?' | '+o.desc:'')}
 function formEditHTML(i){
   var id=i.id,d=function(k,def){var v=S.drafts[k];return esc(v!=null?v:def)};
   var KL={'one-req':'เลือก 1 อย่าง (บังคับ)','one':'เลือก 1 อย่าง (ไม่บังคับ)','many':'เลือกได้หลายอย่าง (ไม่บังคับ)'};
